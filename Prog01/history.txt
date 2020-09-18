@@ -1,0 +1,61 @@
+John O'Donnell
+    1  ls -l
+    2  cd / && ls -l
+    3  cd ~; ls -
+    4  ls -l
+    5  cd Downloads/ && ls -l
+    6  cd ~; clear
+    7  sudo apt-get update
+    8  sudo apt-get upgrade
+    9  cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86_64" | tar xzf -
+   10  ll
+   11  cd .dropbox-dist/
+   12  ll
+   13  cd dropboxd
+   14  ./dropboxd
+   15  ll
+   16  cd ..
+   17  ll
+   18  cd Dropbox
+   19  ll
+   20  cd CSC412-John-ODonnell/
+   21  ll
+   22  ./a.out hello there
+   23  gcc prog01EC2.c
+   24  sudo apt install gcc
+   25  gcc prog01EC2.c
+   26  gcc -Wall prog01EC2.c
+   27  ./a.out hello there
+   28  exit
+   29  ll
+   30  cd ../ll
+   31  cd ..
+   32  ll
+   33  cd Dropbox/; ll
+   34  cd CSC412-John-ODonnell/
+   35  ll
+   36  cd ~
+   37  mkdir work412
+   38  cd work412/
+   39  clear
+   40  pwd
+   41  pwd > path.txt
+   42  cat path.txt
+   43  pr path.txt
+   44  more path.txt
+   45  clear
+   46  ll
+   47  cat path.txt
+   48  touch
+   49  clear
+   50  touch newfile.txt
+   51  ls -la
+   52  vim newfile.txt
+   53  sudo apt install vim
+   54  vim newfile.txt
+   55  history
+   56  ls -l
+   57  history > history.txt
+   58  rm history.txt
+   59  echo "John O'Donnell" > history.txt
+   60  history > history.txt
