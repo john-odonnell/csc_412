@@ -10,12 +10,19 @@ int main(int argc, char* argv[]) {
     // otherwise, print usage statement and return error code
     if (argc == 3) {
         printf("The executable %s was launched with two arguments:\n", execString);
-        printf("\tThe first argument is: %s\n", argv[1]);
-        printf("The second argument is: %s\n", argv[2]);
+        printf("    The first argument is: %s,\n", argv[1]);
+        printf("    The second argument is: %s.\n", argv[2]);
 
         return 0;
     } else {
-        printf("usage:\t%s <argument1> <argument2>\n", execString);
-        return 1;
+        // print usage reminder
+	printf("usage:  %s <argument1> <argument2>\n", execString);
+        
+	// return error code for too few or too many args
+	if (argc < 3) {
+            return 1;
+	} else {
+            return 2;
+	}
     }
 }

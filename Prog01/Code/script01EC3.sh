@@ -1,12 +1,13 @@
 #!/bin/bash
 
 # if the correct amount of arguments is given,
-# execute the command using the args
+# build and execute the command using the args
 # 
 # otherwise, echo usage statement
 if [ $# -eq 3  ];
 then
-	./$1 $2 $3
+    gcc -Wall -o ${1} prog01.c
+    ./$1 $2 $3
 else
-	echo -e "usage:\t./script01EC3.sh executable arg1 arg2"
+    echo -e "usage:  ./script01EC3.sh ./myProg arg1 arg2"
 fi

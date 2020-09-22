@@ -16,17 +16,25 @@ int main(int argc, char* argv[]) {
     // create a char pointer to the array idx after the final slash
     char* execFile = (void*)execString + idxLastSlash + 1;
 
-    // print argument data if there are 3 given (exec cmd, arg1, arg2)
+    // print argument data if there are 2 given
+    // format: ./exec arg1 arg2
     //
     // otherwise, print usage statement and return error code
     if (argc == 3) {
         printf("The executable %s was launched with two arguments:\n", execFile);
-        printf("\tThe first argument is: %s\n", argv[1]);
-        printf("The second argument is: %s\n", argv[2]);
+        printf("    The first argument is: %s,\n", argv[1]);
+        printf("    The second argument is: %s.\n", argv[2]);
 
         return 0;
     } else {
+	// print usage reminder
         printf("usage:\t%s <argument1> <argument2>\n", execFile);
-        return 1;
+        
+	// return error code for too few or too many args
+	if (argc < 3) {
+            return 1;
+	} else {
+            return 2;
+	}
     }
 }
