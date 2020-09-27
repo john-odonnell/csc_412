@@ -52,7 +52,7 @@ void fibGen(int* arr, int f1, int f2, int n) {
 // OUTPUT FIBONACCI SEQUENCE
 // adheres to assignment section 2.1 output specifications
 // RETURN VOID
-void fibOut(int* arr, int fi, int f2, int n) {
+void fibOut(int* arr, int f1, int f2, int n) {
     for (int i = 0; i < n; i++) {
         printf("F%d=%d", i+1, arr[i]);
 
@@ -73,6 +73,11 @@ void fibOut(int* arr, int fi, int f2, int n) {
 // 1 if an input argument is not a valid integer
 // 2 if the given F2 is not greater than the given F1
 int main(int argc, char* argv[]) {
+    if (argc != 4) {
+        printf("usage:\t%s F1 F2 n, with F2>F1>0 and n>0.\n", argv[0]);
+        return 1;
+    }
+
     // convert and validate input
     int f1 = convert(argv[1]);
     int f2 = convert(argv[2]);
