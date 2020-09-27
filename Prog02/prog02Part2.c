@@ -93,8 +93,7 @@ int findUnique(int* fib, int fibLen, int* unique, int uniqueLen) {
 // outputs all the unqiue values found in the many generated fibonacci sequences
 // RETURN VOID
 void uniqueOut(int* unique, int len) {
-    printf("The values encountered in the sequences are\n");
-    printf("    {");
+    printf("{");
     for (int i = 0; i < len; i++) {
         printf("%d", unique[i]);
         if (i != len-1) {
@@ -104,11 +103,18 @@ void uniqueOut(int* unique, int len) {
     printf("}\n");
 }
 
+// COMPARISON FUNCTION
+// used by qsort function to compare integer values
+// RETURN VALUES
+// : N, the difference between a and b
+int compfunc(const void* a, const void* b) {
+    return (*(int*)a - *(int*)b);
+}
+
 // MAIN FUNCTION
 // takes input - sets of 3 ints describing different Fib seqs
 // calls validation on each set
 // calls fibonacci generator and output function for each
-// 
 // RETURN VALUES
 // 0 if all operations terminate successfully
 // 1 if input is invalid, either in form or type
@@ -160,6 +166,9 @@ int main(int argc, char* argv[]) {
     
     // reallocate memory for total number of unique values and output
     unique = realloc(unique, sizeof(int)*uniqueValues);
+    printf("The values encountered in the sequences are\n    ");
+    uniqueOut(unique, uniqueValues);
+    qsort(unique, uniqueValues, sizeof(int), compfunc);
     uniqueOut(unique, uniqueValues);
     free(unique);
 
