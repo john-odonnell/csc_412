@@ -101,6 +101,7 @@ int main(int argc, char* argv[]) {
     
     // call output function
     fibOut(fibSeries, f1, f2, n);
+    free(fibSeries);
 
     return 0;
 }
