@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     int  n = convert(argv[3]);
     
     // usage reminders and error codes for failed validations
-    if (f1 == -1 || f2 == -1 || n == -1) {
+    if (f1 == -1 || f2 == -1 || n == -1 || f1 == 0 || f2 == 0 || n == 0) {
         printf("usage:\t%s F1 F2 n, with F2>F1>0 and n>0.\n", argv[0]);
         return 1;
     }
