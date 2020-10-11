@@ -6,6 +6,10 @@
 // ARRAY CONSTRUCTOR
 // allocated memory for struct and array, then calls array initializer
 Array2d* Array2d_new(int width, int height, int size) {
+    if (width <= 0 || height <= 0 || size <= 0) {
+        return NULL;
+    }
+
     // allocate memory for 2d array stuct
     Array2d* array2d = malloc(sizeof(*array2d));
     // pass:
@@ -60,5 +64,11 @@ int Array2d_size(Array2d* arr) {
 // 1. call AT function
 // 2. assign value/dereference pointer
 void* Array2d_at(Array2d* arr, int i, int j) {
-    return (void*)( (char*)arr->arr + (i * arr->width * arr->size) + (j * arr->size) );
+    int width = arr->width;
+    int height = arr->height;
+    int size = arr->size;
+    if (i >= height || j >= width) {
+        return NULL;
+    }
+    return (void*)( (char*)arr->arr + (i * width * size) + (j * size) );
 }

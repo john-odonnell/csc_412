@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "array2d.h"
-#include "readFile.h"
+#include "fileOps.h"
 
 // PRINT 2D ARRAY
 // used in testing to output a 2d array
@@ -106,6 +106,10 @@ void printMatches(int* matches, char* filename, char* outputFile, int pass) {
     } else {
         stream = fopen(outputFile, "a");
     }
+
+    printf("~~PRINT PROCESS~~\n");
+    printf("out file: %s\n", outputFile);
+    printf("cur file: %s\n", filename);
     
     fprintf(stream, "%s\n    ", filename);
 
@@ -122,87 +126,6 @@ void printMatches(int* matches, char* filename, char* outputFile, int pass) {
     return;
 }
 
-// RECURSE THROUGH DIRECTORY
-// opens a directory, and fills an array with filenames of all .img files
-// RETURN VALUES
-// NULL   if the directory is invalid, or if the directory contains no .img files
-// CHAR** if the directory contains at least on e .img file
-char** recurseDir(char* path, int* totalFiles) {
-    // open and validate directory stream
-    DIR* dir = opendir(path);
-    if (dir == NULL) {
-        printf("Invalid path: %s\n", path);
-        exit(1);
-    }
-    
-    struct dirent* entry;
-    *totalFiles = 0;
-
-    // loop to determine length of return array
-    while ((entry = readdir(dir)) != NULL) {
-        // pull name and file type from struct
-        const char* name = entry->d_name;
-        unsigned char type = entry->d_type;
-        // isolate file extension
-        char* thisExt = calloc(1, sizeof(char) * 5);
-        int nameLen = strlen(name);
-        memcpy(thisExt, &name[nameLen-4], 4);
-        printf("ext: %s\n", thisExt);
-
-        // if the entry
-        // : is a normal type file
-        // : is not the '.' or '..' directories
-        // : has the file extension .img
-        // increment the file counter
-        if ((name[0] != '.') && (type == DT_REG) && (!strcmp(".img", thisExt))) {
-            printf(".img file found: %s\n", name);
-            *totalFiles = *totalFiles + 1;
-        }
-
-        free(thisExt);
-    }
-
-    closedir(dir);
-    printf("%d files found\n", *totalFiles);
-
-    char** files = (char**)calloc(1, ((*totalFiles * 2) + 1)* sizeof(char*));
-
-    int i = 0;
-    dir = opendir(path);
-    while ((entry = readdir(dir)) != NULL) {
-        // pull name and file type from struct
-        char* name = entry->d_name;
-        unsigned char type = entry->d_type;
-        // isolate file extension
-        char* thisExt = calloc(1, sizeof(char) * 5);
-        int nameLen = strlen(name);
-        memcpy(thisExt, &name[nameLen-4], 4);
-
-        // if the entry
-        // : is a normal type file
-        // : is not the '.' or '..' directories
-        // : has the file extension .img
-        // allocate a new filename string and add it to the array of files
-        // copy the filename into the allocation
-        // increment the file counter
-        if ((name[0] != '.') && (type == DT_REG) && (!strcmp(".img", thisExt))) {
-            printf(".img file added: %s\n", name);
-            files[i] = (char*)malloc(strlen(name) + 1);
-            strcpy(files[i], name);
-            i++;
-        }
-
-        free(thisExt);
-    }
-
-    closedir(dir);
-
-    for (int j = 0; j < *totalFiles; j++) {
-        printf("\t%s\n", files[j]);
-    }
-
-    return files;
-}
 
 // MAIN FUNCTION
 // INPUT FORMAT: ./<exec> <pat> <dir> <out>
@@ -242,13 +165,26 @@ int main(int argc, char* argv[]) {
     char* outputFilePath = calloc(1, sizeof(char*) * (strlen(argv[3]) + strlen(patternFilename) + 9));
     
     memcpy(outputFilePath, argv[3], strlen(argv[3]));
+    printf("out dir: %s\n", argv[3]);
+    if (argv[3][strlen(argv[3])-1] != '/') {
+        strcat(outputFilePath, "/");
+    }
     strcat(outputFilePath, patternFilename);
     strcat(outputFilePath, outputFilenameAddition);
+    outputFilePath = realloc(outputFilePath, sizeof(char)*(strlen(outputFilePath) + 1));
 
-    printf("%s\n", outputFilePath);
+    // printf("%s\n", outputFilePath);
+    printf("out file: %s\n", outputFilePath);
+
+
 
     // get a list of filenames in the <dir> directory of the .img type
     int totalFiles = 0;
+    printf("txt dir: %s\n", argv[2]);
+    if (argv[2][strlen(argv[2])-1] != '/') {
+        strcat(argv[2], "/");
+    } 
+    printf("txt dir: %s\n", argv[2]);
     char** files = recurseDir(argv[2], &totalFiles);
 
     
@@ -263,6 +199,7 @@ int main(int argc, char* argv[]) {
 
         Array2d* img = readFile(filepath);
         int* matches = findMatches(pat, img);
+        
         printMatches(matches, files[i], outputFilePath, i);
 
         free(filepath);
