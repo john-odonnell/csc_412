@@ -67,6 +67,7 @@ else
     gcc -Wall -g -o ${EXEC_NAME} array2d.c fileOps.c prog.c
 
     # run the c program for each pattern file
+    CONCURRENT_CMD=""
     for file in $PAT_DIR*; do
         if [[ ${file##*.} == "pat" ]]; then
             ./${EXEC_NAME} ${file} ${IMG_DIR} ${OUT_DIR}
