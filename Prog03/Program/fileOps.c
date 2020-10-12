@@ -74,7 +74,6 @@ char** recurseDir(char* path, int* totalFiles) {
         char* thisExt = calloc(1, sizeof(char) * 5);
         int nameLen = strlen(name);
         memcpy(thisExt, &name[nameLen-4], 4);
-        printf("ext: %s\n", thisExt);
 
         // if the entry
         // : is a normal type file
@@ -82,7 +81,6 @@ char** recurseDir(char* path, int* totalFiles) {
         // : has the file extension .img
         // increment the file counter
         if ((name[0] != '.') && (type == DT_REG) && (!strcmp(".img", thisExt))) {
-            printf(".img file found: %s\n", name);
             *totalFiles = *totalFiles + 1;
         }
 
@@ -90,7 +88,6 @@ char** recurseDir(char* path, int* totalFiles) {
     }
 
     closedir(dir);
-    printf("%d files found\n", *totalFiles);
 
     char** files = (char**)calloc(1, ((*totalFiles * 2) + 1)* sizeof(char*));
 
@@ -113,7 +110,6 @@ char** recurseDir(char* path, int* totalFiles) {
         // cope the filename into the allocation
         // increment the file counter
         if ((name[0] != '.') && (type == DT_REG) && (!strcmp(".img", thisExt))) {
-            printf(".img file added: %s\n", name);
             files[i] = (char*)malloc(strlen(name)+1);
             strcpy(files[i], name);
             i++;
@@ -123,10 +119,6 @@ char** recurseDir(char* path, int* totalFiles) {
     }
 
     closedir(dir);
-
-    for (int j = 0; j < *totalFiles; j++) {
-        printf("\t%s\n", files[j]);
-    }
 
     return files;
 }

@@ -7,26 +7,6 @@
 #include "array2d.h"
 #include "fileOps.h"
 
-// PRINT 2D ARRAY
-// used in testing to output a 2d array
-// used to manually validate input gathering function
-// RETURN VOID
-void printArr(Array2d* arr) {
-    int w = Array2d_width(arr);
-    int h = Array2d_height(arr);
-
-    printf("~~Array~~\nw:%d h:%d\n", w, h);
-
-    char *placehold;
-    for (int i = 0; i < h; i++) {
-        for (int j = 0; j < w; j++) {
-            placehold = Array2d_at(arr, i, j);
-            printf("%c ", *placehold);
-        }
-        printf("\n");
-    }
-}
-
 // PATTERN CHECK
 // given a certain (i,j), determine if the pattern given matches
 // a portion of the image the same size as the pattern where
@@ -80,7 +60,6 @@ int* findMatches(Array2d* pat, Array2d* img) {
                 totalMatches++;
                 matches[(totalMatches * 2) - 1] = i;
                 matches[totalMatches * 2] = j;
-                printf("totMat: %d\n", totalMatches);
             }
         }
     }
@@ -107,10 +86,6 @@ void printMatches(int* matches, char* filename, char* outputFile, int pass) {
         stream = fopen(outputFile, "a");
     }
 
-    printf("~~PRINT PROCESS~~\n");
-    printf("out file: %s\n", outputFile);
-    printf("cur file: %s\n", filename);
-    
     fprintf(stream, "%s\n    ", filename);
 
     for (int i = 0; i < len; i++) {
@@ -158,14 +133,12 @@ int main(int argc, char* argv[]) {
     char* patternFilename = calloc(1, sizeof(char) * (strlen(argv[1]) - idxFinalSlash));
     strcpy(patternFilename, argv[1] + idxPatternFilename);
     patternFilename[idxFileExtension - idxPatternFilename] = '\0';
-    printf("pattern filename: %s\n", patternFilename);
     
     // set output filename
     char* outputFilenameAddition = "_Matches.txt";
     char* outputFilePath = calloc(1, sizeof(char*) * (strlen(argv[3]) + strlen(patternFilename) + 9));
     
     memcpy(outputFilePath, argv[3], strlen(argv[3]));
-    printf("out dir: %s\n", argv[3]);
     if (argv[3][strlen(argv[3])-1] != '/') {
         strcat(outputFilePath, "/");
     }
@@ -173,18 +146,11 @@ int main(int argc, char* argv[]) {
     strcat(outputFilePath, outputFilenameAddition);
     outputFilePath = realloc(outputFilePath, sizeof(char)*(strlen(outputFilePath) + 1));
 
-    // printf("%s\n", outputFilePath);
-    printf("out file: %s\n", outputFilePath);
-
-
-
     // get a list of filenames in the <dir> directory of the .img type
     int totalFiles = 0;
-    printf("txt dir: %s\n", argv[2]);
     if (argv[2][strlen(argv[2])-1] != '/') {
         strcat(argv[2], "/");
     } 
-    printf("txt dir: %s\n", argv[2]);
     char** files = recurseDir(argv[2], &totalFiles);
 
     
@@ -195,7 +161,6 @@ int main(int argc, char* argv[]) {
         strcpy(filepath, argv[2]);
         filepath = realloc(filepath, sizeof(char) * (strlen(argv[2]) + 1 + strlen(files[i])));
         strcat(filepath, files[i]);
-        printf("filepath: %s\n", filepath);
 
         Array2d* img = readFile(filepath);
         int* matches = findMatches(pat, img);
@@ -207,18 +172,7 @@ int main(int argc, char* argv[]) {
         free(matches);
     }
 
-    // read image into 2d arr
-    // Array2d* img = readFile(argv[2]);
-    
-    // printf("Pat Pointer: %p\n", pat);
-    // printArr(pat);
-    // printf("Img Pointer: %p\n", img);
-    // printArr(img);
-
-    // int* matches = findMatches(pat, img);
-    // printMatches(matches);
-    // free(matches);
-
+    // free all allocated memory
     for (int i = 0; i < (totalFiles * 2) + 1; i++) {
         free(files[i]);
     }
@@ -227,10 +181,6 @@ int main(int argc, char* argv[]) {
     free(outputFilePath);
     free(files);
     Array2d_free(pat);
-    // Array2d_free(img);
-    // printf("Memory cleared.\n");
-
-    // recurseDir(argv[3]);
 
     return 0;
 }
