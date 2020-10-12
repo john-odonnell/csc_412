@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# usage: ./script <exec_name> <img_dir> <pat_dir> <out_dir>
+
+# FLOW
+# replace Windows line endings with Unix line endings in all .pat files
+# build c program
+# launch it with each .pat file
+
+if [[ $# -ne 4  ]]; then
+    echo "usage:  ${0} <exec_name> <img_dir> <pat_dir> <out_dir>"
+else
+    echo '$0' $0
+    echo '$1' $1
+    echo '$2' $2
+    echo '$3' $3
+    echo '$4' $4
+    
+    # set variables for dir paths
+    EXEC_NAME=${1}
+    IMG_DIR=${2}
+    PAT_DIR=${3}
+    OUT_DIR=${4}
+
+    # add trailing slashes if necessary
+    if [[ ${IMG_DIR:(-1)} != "/" ]]; then
+        IMG_DIR="${IMG_DIR}/"
+    fi
+    echo $IMG_DIR
+    if [[ ${PAT_DIR:(-1)} != "/" ]]; then
+        PAT_DIR="${PAT_DIR}/"
+    fi
+    echo $PAT_DIR
+    if [[ ${OUT_DIR:(-1)} != "/" ]]; then
+        OUT_DIR="${OUT_DIR}/"
+    fi
+    echo $OUT_DIR
+
+    # replace line endings
+    # set new working dir
+    WORK_DIR="${PAT_DIR}WORKING/"
+    mkdir $WORK_DIR
+
+    # for each file in the patterns dir
+    # if the file is a .pat file
+    # read each line, remove \r, and append it to a new working copy
+    # replace the original with the edited copy
+    for file in $PAT_DIR*; do
+        if [[ ${file##*.} == "pat" ]]; then
+            FILENAME=$(basename $file)
+            FILE_COPY="${WORK_DIR}${FILENAME}"
+            # echo $file
+            # echo $FILE_COPY
+
+            cat $file | while read line; do
+                echo $line | tr -d '\r' >> $FILE_COPY
+            done
+
+            mv $FILE_COPY $file
+        fi
+    done
+
+    # delete the working directory
+    rm -R ${WORK_DIR}
+
+    # build c program
+    gcc -Wall -g -o ${EXEC_NAME} array2d.c fileOps.c prog.c
+
+    # run the c program for each pattern file
+    for file in $PAT_DIR*; do
+        if [[ ${file##*.} == "pat" ]]; then
+            ./${EXEC_NAME} ${file} ${IMG_DIR} ${OUT_DIR}
+        fi
+    done
+fi
