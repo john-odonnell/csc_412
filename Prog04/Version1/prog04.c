@@ -11,8 +11,6 @@
 // add all regular type files to an array
 // return fully populated array
 char** recurseDirectory(char* path, int* totalFiles) {
-    printf("||| RECURSE DIRECTORY |||\n");
-    
     // open and validate directory stream
     DIR* dir = opendir(path);
     if (dir == NULL) {
@@ -32,7 +30,6 @@ char** recurseDirectory(char* path, int* totalFiles) {
             *totalFiles = *totalFiles + 1;
         }
     }
-    printf("total files: %d\n", *totalFiles);
 
     closedir(dir);
 
@@ -44,15 +41,11 @@ char** recurseDirectory(char* path, int* totalFiles) {
     while((entry = readdir(dir)) != NULL) {
         char* name = entry->d_name;
         unsigned char type = entry->d_type;
-        printf("file %d: %s\n", i, name);
 
         if ((name[0] != '.') && (type == DT_REG)) {
-            files[i] = (char*)malloc(strlen(path) + strlen(name) + 1);
-            printf("\tarr[%d] memloc: %p\n", i, files + i);
-            printf("\t%p allocated\n", (void*)files[i]);
+            files[i] = (char*)calloc(1, strlen(path) + strlen(name) + 1);
             strcat(files[i], path);
             strcat(files[i], name);
-            printf("\t%s assigned\n", files[i]);
             i++;
         }
     }
@@ -64,13 +57,9 @@ char** recurseDirectory(char* path, int* totalFiles) {
 }
 
 void childProcess(char** files, int start, int interval, char**** lists, int** lengths, int numProcesses, int proc){
-    printf("||| CHILD PROCESS %d |||\n", proc);
-    
     // allocate memory for lists of files for each process
     char*** sublists = malloc(numProcesses * sizeof(void*));
     int* filesPerProcess = calloc(1, numProcesses * sizeof(int));
-    printf("\tsublists ptr : %p\n", (void*)sublists);
-    printf("\tfileCnt pntr : %p\n", (void*)filesPerProcess);
 
     // TODO CHILD PROCESS LOGIC
     FILE *stream;
@@ -86,47 +75,31 @@ void childProcess(char** files, int start, int interval, char**** lists, int** l
         fscanf(stream, "%d ", &procId);
         filesPerProcess[procId] = filesPerProcess[procId] + 1;
         fclose(stream);
-
-        printf("file: %s\n\tproc: %d\n", files[i], procId);
     }
 
     for (int i = 0; i < numProcesses; i++) {
         // allocate lists based on filePerProcess counter
         sublists[i] = malloc(sizeof(void*) * filesPerProcess[i]);
-        printf("sublist %d created\n", i);
     }
 
     char*** ptrs = malloc(sizeof(char*) * numProcesses);
     for (int i = 0; i < numProcesses; i++) {
         ptrs[i] = &sublists[i][0];
-        printf("PTR%d : %p\n", i, (void*)ptrs[i]);
     }
     for (int i = start; i < start + interval; i++) {
         // insert each file into the process files list
         stream = fopen(files[i], "r");
         fscanf(stream, "%d ", &procId);
         fclose(stream);
-        // *ptrs[procId] = (char*)malloc(sizeof(char) * (strlen(files[i]) + 1));
-        // strcpy(*ptrs[procId], files[i]);
         *ptrs[procId] = files[i];
-        printf("PTR%d : %p\tVALUE : %s\n", procId, ptrs[procId], *ptrs[procId]);
         ptrs[procId] = ptrs[procId] + 1;
     }
 
-    printf("\n\nCONTENTS OF SUBLIST\n");
-    for (int i = 0; i < numProcesses; i++) {
-        printf("PROCESS %d\n", i);
-        for (int j = 0; j < filesPerProcess[i]; j++) {
-            printf("\tFILE: %s\n", sublists[i][j]);
-        }
-    }
-    printf("\n\n");
+    free(ptrs);
 
     // assign pointer to process file list into parent array
     lists[proc] = sublists;
-    printf("SUBLIST POINTER IN LISTS: %p\n", lists[proc]);
     lengths[proc] = filesPerProcess;
-    printf("SUBLIST POINTER IN LENGTH: %p\n", lengths[proc]);
 }
 
 // comparison function for qsort
@@ -152,9 +125,7 @@ int cmpfunc(const void* a, const void* b) {
     return (aLine - bLine);
 }
 
-// TODO PROCESSING FUNCTION
 char* processing(char*** lists, int** lengths, int processId, int numProcesses) {
-    printf("||| PROCESSING PROCESS %d |||\n", processId);
     // order the files by index
     // store their outputs sequentially in a string
     // return the long string
@@ -164,11 +135,9 @@ char* processing(char*** lists, int** lengths, int processId, int numProcesses) 
     for (int i = 0; i < numProcesses; i++) {
         fileCount += lengths[i][processId];
     }
-    printf("\tprocess filecount : %d\n", fileCount);
 
     // allocate array for ordered files
     char** toOrder = malloc(fileCount * sizeof(char*));
-    printf("new array allocated to sort files by line number\n");
 
     // insert all files into single array
     int idx = 0;
@@ -176,14 +145,12 @@ char* processing(char*** lists, int** lengths, int processId, int numProcesses) 
         int len = lengths[i][processId];
         for (int j = 0; j < len; j++) {
             toOrder[idx] = lists[i][j];
-            printf("%s inserted\n", toOrder[idx]);
             idx++;
         }
     }
 
     // order array
     qsort(toOrder, fileCount, sizeof(char*), cmpfunc);
-    printf("sorted by line number\n");
 
     // concatenate strings
     char* output = malloc(sizeof(char));
@@ -191,18 +158,19 @@ char* processing(char*** lists, int** lengths, int processId, int numProcesses) 
     FILE* stream;
     int procId, line;
     for (int i = 0; i < fileCount; i++) {
-        char* code = malloc(sizeof(char) * 100);
+        char* code = calloc(1, sizeof(char) * 100);
 
         stream = fopen(toOrder[i], "r");
-        fscanf(stream, "%d %d ", &procId, &line);
+        fscanf(stream, "%d %d", &procId, &line);
         fgets(code, 100, stream);
-        printf("line:%d\t%s\n", line, code);
-        printf("strlen code : %lu\n", strlen(code));
+        fclose(stream);
 
-        output = realloc(output, sizeof(char) * (strlen(output) + strlen(code)));
+        output = realloc(output, sizeof(char) * (strlen(output) + strlen(code) + 1));
         strcat(output, code);
-        printf("new output : %s\n", output);
+        free(code);
     }
+
+    free(toOrder);
 
     return output;
 }
@@ -222,20 +190,12 @@ int main(int argc, char* argv[]) {
     sscanf(argv[1], "%d", &numProcesses);
     char* path = argv[2];
 
-    printf("||| MAIN FUNCTION |||\n");
-    printf("numProc : %d\n", numProcesses);
-    printf("path    : %s\n", path);
-
     // fill an array with all the files in the directory
     int numFiles = 0;
     char** files = recurseDirectory(path, &numFiles);
-    printf("||| MAIN FUNCTION |||\n");
-    printf("numFile : %d\n", numFiles);
 
     int interval = numFiles / numProcesses;
     int remainder = numFiles % numProcesses;
-    printf("interval : %d\n", interval);
-    printf("remainder: %d\n", remainder);
 
     // pointer to an array of numProcesses pointers
     // these pointers will point to groups of arrays returned by child processes
@@ -266,67 +226,51 @@ int main(int argc, char* argv[]) {
         // : : of the list that belongs to Process :IDX
         // : a pointer to the list is inserted into the process'
         // : location in the lists group
-        printf("call Child Process %d\n", i);
-        printf("\tstart idx : %d\n", start);
-        printf("\tinterval  : %d\n", j);
-        printf("\tfiles ptr : %p\n", (void*)files);
-        printf("\tlists ptr : %p\n", (void*)lists);
-        printf("\tlens ptr  : %p\n", (void*)lengths);
         childProcess(files, start, j, lists, lengths, numProcesses, i);
-        printf("||| MAIN FUNCTION |||\n");
     }
-
-    printf("\n\n\nCONTENTS OF LISTS\n");
-    for (int i = 0; i < numProcesses; i++) {
-        for (int j = 0; j < numProcesses; j++) {
-            printf("PROCESS %d\n", j);
-            for (int k = 0; k < lengths[i][j]; k++) {
-                printf("\t\tFILE: %s\n", lists[i][j][k]);
-            }
-        }
-    }
-    printf("\n\n\n");
-
 
     char* totalOutput = malloc(sizeof(char));
     totalOutput[0] = '\0';
     for (int i = 0; i < numProcesses; i++) {
         char*** thisProcLists = malloc(numProcesses * sizeof(void*));
         
-        printf("Lists for Processing process:\n");
         for (int j = 0; j < numProcesses; j++) {
             thisProcLists[j] = lists[j][i];
-            printf("\t%p\n", (void*)thisProcLists[j]);
         }
-        printf("New pointer allocated for use in Process%d\n", i);
         
-
-        // TODO STORE OUTPUT
         char* procOutput = processing(thisProcLists, lengths, i, numProcesses);
-        printf("PROCESS %d\n", i);
-        printf("%s\n", procOutput);
 
         totalOutput = realloc(totalOutput, sizeof(char) * (strlen(totalOutput) + strlen(procOutput) + 1));
         strcat(totalOutput, procOutput);
 
-        // free
-        for (int j = 0; j < numProcesses; j++) {
-            free(thisProcLists[j]);
-        }
         free(thisProcLists);
+        free(procOutput);
     }
 
-    // TODO CONCATENATE AND OUTPUT SRC FILE
     FILE* stream = fopen("src.c", "w");
-    printf("\n\n||| OUTPUT |||\n");
-    printf("%s\n", totalOutput);
     fputs(totalOutput, stream);
+    fclose(stream);
     
-    // TODO FREES
-    // free lists
-    free(lengths);
+    for (int i = 0; i < numProcesses; i++) {
+        for (int j = 0; j < numProcesses; j++) {
+            for (int k = 0; k < lengths[i][j]; k++) {
+                free(lists[i][j][k]);
+            }
+            free(lists[i][j]);
+        }
+        free(lists[i]);
+    }
+
     free(lists);
+
+    for (int i = 0; i < numProcesses; i++) {
+        free(lengths[i]);
+    }
+
+    free(lengths);
+
     free(files);
+    free(totalOutput);
 
     return 0;
 }
