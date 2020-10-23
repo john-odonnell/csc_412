@@ -158,11 +158,11 @@ char* processing(char*** lists, int** lengths, int processId, int numProcesses) 
     FILE* stream;
     int procId, line;
     for (int i = 0; i < fileCount; i++) {
-        char* code = calloc(1, sizeof(char) * 100);
+        char* code = calloc(1, sizeof(char) * 4096);
 
         stream = fopen(toOrder[i], "r");
         fscanf(stream, "%d %d", &procId, &line);
-        fgets(code, 100, stream);
+        fgets(code, 4096, stream);
         fclose(stream);
 
         output = realloc(output, sizeof(char) * (strlen(output) + strlen(code) + 1));
@@ -229,6 +229,7 @@ int main(int argc, char* argv[]) {
         childProcess(files, start, j, lists, lengths, numProcesses, i);
     }
 
+    // send each process its files and 
     char* totalOutput = malloc(sizeof(char));
     totalOutput[0] = '\0';
     for (int i = 0; i < numProcesses; i++) {
@@ -238,19 +239,22 @@ int main(int argc, char* argv[]) {
             thisProcLists[j] = lists[j][i];
         }
         
+        // get output from process, reallocate final output string and append
         char* procOutput = processing(thisProcLists, lengths, i, numProcesses);
-
         totalOutput = realloc(totalOutput, sizeof(char) * (strlen(totalOutput) + strlen(procOutput) + 1));
         strcat(totalOutput, procOutput);
 
+        // free process specific list and string
         free(thisProcLists);
         free(procOutput);
     }
 
+    // open output file and output final string
     FILE* stream = fopen("src.c", "w");
     fputs(totalOutput, stream);
     fclose(stream);
-    
+
+    // free lists of files
     for (int i = 0; i < numProcesses; i++) {
         for (int j = 0; j < numProcesses; j++) {
             for (int k = 0; k < lengths[i][j]; k++) {
@@ -260,16 +264,15 @@ int main(int argc, char* argv[]) {
         }
         free(lists[i]);
     }
-
     free(lists);
-
+    // free lists of file list lengths
     for (int i = 0; i < numProcesses; i++) {
         free(lengths[i]);
     }
-
     free(lengths);
-
+    // free original file list
     free(files);
+    // free final output string
     free(totalOutput);
 
     return 0;
