@@ -61,7 +61,6 @@ void childProcess(char** files, int start, int interval, char**** lists, int** l
     char*** sublists = malloc(numProcesses * sizeof(void*));
     int* filesPerProcess = calloc(1, numProcesses * sizeof(int));
 
-    // TODO CHILD PROCESS LOGIC
     FILE *stream;
     int procId = 0;
     for (int i = start; i < start + interval; i++) {
