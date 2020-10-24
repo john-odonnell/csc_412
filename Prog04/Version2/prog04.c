@@ -277,6 +277,7 @@ int main(int argc, char* argv[]) {
     int numProcesses;
     sscanf(argv[1], "%d", &numProcesses);
     char* path = argv[2];
+    char* outFile = argv[3];
 
     // fill an array with all the files in the directory
     int numFiles = 0;
@@ -327,12 +328,12 @@ int main(int argc, char* argv[]) {
     }
 
     // wait for child processes to complete
-    // pid_t termProcess;
+    pid_t termProcess;
     int statusVal;
     for (int i = 0; i < numProcesses; i++) {
-        waitpid(-1, &statusVal, 0);
-        // termProcess = waitpid(-1, &statusVal, 0);
-        // printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        // waitpid(-1, &statusVal, 0);
+        termProcess = waitpid(-1, &statusVal, 0);
+        printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // create another batch of child processes to process data
@@ -349,15 +350,15 @@ int main(int argc, char* argv[]) {
 
     // wait for subchild processes
     for (int i = 0; i < numProcesses; i++) {
-        waitpid(-1, &statusVal, 0);
-        // termProcess = waitpid(-1, &statusVal, 0);
-        // printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        // waitpid(-1, &statusVal, 0);
+        termProcess = waitpid(-1, &statusVal, 0);
+        printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // process data
     FILE* in;
     FILE* out;
-    out = fopen("src.c", "w");
+    out = fopen(outFile, "w");
     for (int i = 0; i < numProcesses; i++) {
         // create input filenames
         char* inputFilename = calloc(1, sizeof(char) * 10);
