@@ -264,10 +264,11 @@ char* processing(int processId, int numProcesses) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        printf("usage: ./a.out <n> <path>\n");
+    if (argc != 4) {
+        printf("usage: ./a.out <n> <path> <out>\n");
         printf(" <n>    : number of child processes\n");
         printf(" <path> : path to directory of files\n");
+        printf(" <out>  : path to output file\n");
         return 1;
     }
 
@@ -328,12 +329,12 @@ int main(int argc, char* argv[]) {
     }
 
     // wait for child processes to complete
-    pid_t termProcess;
+    // pid_t termProcess;
     int statusVal;
     for (int i = 0; i < numProcesses; i++) {
-        // waitpid(-1, &statusVal, 0);
-        termProcess = waitpid(-1, &statusVal, 0);
-        printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        waitpid(-1, &statusVal, 0);
+        // termProcess = waitpid(-1, &statusVal, 0);
+        // printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // create another batch of child processes to process data
@@ -350,9 +351,9 @@ int main(int argc, char* argv[]) {
 
     // wait for subchild processes
     for (int i = 0; i < numProcesses; i++) {
-        // waitpid(-1, &statusVal, 0);
-        termProcess = waitpid(-1, &statusVal, 0);
-        printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        waitpid(-1, &statusVal, 0);
+        // termProcess = waitpid(-1, &statusVal, 0);
+        // printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // process data

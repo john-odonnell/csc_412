@@ -175,10 +175,11 @@ char* processing(char*** lists, int** lengths, int processId, int numProcesses) 
 }
 
 int main(int argc, char* argv[]) {
-    if (argc != 3) {
-        printf("usage: ./a.out <n> <path>\n");
+    if (argc != 4) {
+        printf("usage: ./a.out <n> <path> <out>\n");
         printf(" <n>    : number of child processes\n");
         printf(" <path> : path to directory of files\n");
+        printf(" <out>  : path to output file\n");
         return 1;
     }
 
