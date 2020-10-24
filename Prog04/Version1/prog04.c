@@ -188,6 +188,7 @@ int main(int argc, char* argv[]) {
     int numProcesses;
     sscanf(argv[1], "%d", &numProcesses);
     char* path = argv[2];
+    char* outFile = argv[3];
 
     // fill an array with all the files in the directory
     int numFiles = 0;
@@ -249,7 +250,7 @@ int main(int argc, char* argv[]) {
     }
 
     // open output file and output final string
-    FILE* stream = fopen("src.c", "w");
+    FILE* stream = fopen(outFile, "w");
     fputs(totalOutput, stream);
     fclose(stream);
 
