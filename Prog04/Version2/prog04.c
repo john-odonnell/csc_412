@@ -81,6 +81,11 @@ void childProcess(char** files, int start, int interval, int numProcesses, int p
             exit(1);
         }
         fscanf(stream, "%d ", &procId);
+
+        if (procId < 0 || procId >= numProcesses) {
+            printf("Invalid Process ID %d\n", procId);
+        }
+
         filesPerProcess[procId] = filesPerProcess[procId] + 1;
         fclose(stream);
     }
@@ -109,9 +114,9 @@ void childProcess(char** files, int start, int interval, int numProcesses, int p
         char* destination = calloc(1, sizeof(char) * 10);
         sprintf(filename, "%d", proc);
         sprintf(destination, "%d", i);
+        filename = realloc(filename, sizeof(char) * (strlen(filename) + strlen(destination) + 2));
         strcat(filename, ".");
         strcat(filename, destination);
-        filename = realloc(filename, sizeof(char) * strlen(filename));
         // open file and write filenames to it
         stream = fopen(filename, "w");
         if (stream == NULL) {
@@ -128,6 +133,12 @@ void childProcess(char** files, int start, int interval, int numProcesses, int p
     }
 
     free(ptrs);
+    free(filesPerProcess);
+
+    for (int i = 0; i < numProcesses; i++) {
+        free(sublists[i]);
+    }
+    free(sublists);
 
     exit(0);
 }
@@ -201,11 +212,13 @@ char* processing(int processId, int numProcesses) {
         }
 
         fclose(stream);
+        free(placeholder);
 
         if (remove(filename) != 0) {
             printf("Unable to delete file %s\n", filename);
         }
 
+        free(destination);
         free(filename);
     }
 
@@ -239,7 +252,12 @@ char* processing(int processId, int numProcesses) {
         free(code);
     }
     fclose(to_file);
+   
+    free(outputFilename);
     
+    for (int i = 0; i < idx; i++) {
+        free(toOrder[i]);
+    }
     free(toOrder);
     
     exit(0);
@@ -290,7 +308,6 @@ int main(int argc, char* argv[]) {
 
         // call fork
         int p = fork();
-        printf("child %d forked\n", i);
 
         // child process is passed
         // : total list of files
@@ -310,17 +327,17 @@ int main(int argc, char* argv[]) {
     }
 
     // wait for child processes to complete
-    pid_t termProcess;
+    // pid_t termProcess;
     int statusVal;
     for (int i = 0; i < numProcesses; i++) {
-        termProcess = waitpid(-1, &statusVal, 0);
-        printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        waitpid(-1, &statusVal, 0);
+        // termProcess = waitpid(-1, &statusVal, 0);
+        // printf("Parent process got signal from child process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // create another batch of child processes to process data
     for (int i = 0; i < numProcesses; i++) {
         int p = fork();
-        printf("subchild %d forked\n", i);
 
         if (p == 0) {
             processing(i, numProcesses);
@@ -332,8 +349,9 @@ int main(int argc, char* argv[]) {
 
     // wait for subchild processes
     for (int i = 0; i < numProcesses; i++) {
-        termProcess = waitpid(-1, &statusVal, 0);
-        printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
+        waitpid(-1, &statusVal, 0);
+        // termProcess = waitpid(-1, &statusVal, 0);
+        // printf("Parent process got signal from subchild process %6d with status value %d --> %d\n", termProcess, statusVal, WEXITSTATUS(statusVal));
     }
 
     // process data
@@ -366,6 +384,9 @@ int main(int argc, char* argv[]) {
     fclose(out);
 
     // free original file list
+    for (int i = 0; i < numFiles; i++) {
+        free(files[i]);
+    }
     free(files);
 
     return 0;
