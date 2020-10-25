@@ -30,5 +30,18 @@ else
         fi
     done
 
-    ../Version3/v3 ${NUM_PROCS} "${DATA_DIR}" ${OUT_FILE}
+    # set dir variable
+    DIR="$(pwd)"
+
+    last_slash=0
+    dir_len=${#DIR}
+    for ((i = 0 ; i < ${dir_len} ; i++)); do
+        if [[ ${DIR:$((i)):6} == "Prog04" ]]; then
+            last_slash=$((i + 6))
+        fi
+    done
+
+    PROG04_DIR=${DIR:0:${last_slash}}
+
+    "${PROG04_DIR}/Source/Version 3/v3" ${NUM_PROCS} "${DATA_DIR}" ${OUT_FILE}
 fi
