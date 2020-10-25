@@ -12,9 +12,18 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-// recurse through a directory
-// add all regular type files to an array
-// return fully populated array
+/**
+ * Recurse a Directory
+ *
+ * Recurses through a directory. For each item, the path to the file is added
+ * to an array if the file is of the correct type. For each, a pointer to a
+ * file count tracker is incremented.
+ *
+ * @param path Path to a directory
+ * @param totalFiles Pointer to a value which tracks directory members
+ *
+ * @return An array of strings, allocated on the heap
+ */
 char** recurseDirectory(char* path, int* totalFiles) {
     // open and validate directory stream
     DIR* dir = opendir(path);

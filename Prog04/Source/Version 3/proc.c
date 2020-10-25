@@ -6,7 +6,17 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-// comparison function for qsort
+/**
+ * Comparison Function used for QSort
+ *
+ * Compares two elements, which are filepaths. Opens each file and saved their
+ * respective line numbers. The elements will be sorted based on these line numbers.
+ *
+ * @param a A first given list element
+ * @param b A second fiven list element
+ *
+ * @return an integer value based on the difference between elements
+ */
 int cmpfunc(const void* a, const void* b) {
     FILE* stream;
     int aProc, bProc;
@@ -29,10 +39,22 @@ int cmpfunc(const void* a, const void* b) {
     return (aLine - bLine);
 }
 
-// loop through all data files of the form <n>.<processId>
-// collect data into an array and sort
-// ouput to file <processId>.processed
-// exit
+/**
+ * Processing Process
+ *
+ * This process is responsible for ordering the lines of code that this process
+ * is responsible for. A given process of ID <id> opens all files created by
+ * the distribution processes of form <n>.<id>, which all contain filepaths.
+ * Each filepath is inserted into an array, and the array is then ordered by qsort
+ * based on line number. These lines of code are then inserted in their sorted
+ * order into a file <id>.processed.
+ *
+ * @param processId ID for this process
+ * @param numProcesses Total number of processes
+ * @param execPath Path to this process' executable file
+ *
+ * @return 0 if successful, 1 if failure
+ */
 int main(int argc, char* argv[]) {
     // pull args
     int processId = atoi(argv[0]);

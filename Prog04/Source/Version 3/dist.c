@@ -2,16 +2,25 @@
 #include <stdio.h>
 #include <string.h>
 
-// child process responsibilities
-// : build lists of files
-// : output each list of files to a file
-// : files are names <thisPID>.<destPID>, so 0.0, 0.1, ..., <n-1>.<n-1>
+/**
+ * Distribution Process
+ *
+ * The distribution process opens a file, which contians filenames assigned
+ * to the process by the Server. The process reads each filepath, opens the file,
+ * and determines which processing process the file belongs to. The distribution
+ * process writes each filename to a group of output files, <thisProc>.<processingProc>,
+ * where <thisProc> signifies which distribution process handled the process, and
+ * <processingProc> is the ID of the process which will process the file.
+ *
+ * @param files Path to file, consisting of a list of files
+ * @param numProcesses Total number of distribution processes
+ * @param proc This distribution process' ID
+ * @param execPath Path to this module's executable
+ *
+ * @return 0 on success, 1 on failure
+ */
 int main(int argc, char* argv[]) {
     // pull arguments
-
-    // for (int i = 0; i < argc; i++) {
-    //     printf("arg%d\t%s\n", i, argv[i]);
-    // }
 
     // the server will build files of
     // only the filenames a certain process will have
@@ -94,15 +103,6 @@ int main(int argc, char* argv[]) {
         printf("Unable to delete file %s\n", files);
     }
 
-    // for (int i = start; i < start + interval; i++) {
-    //     // insert each file into the process files list
-    //     stream = fopen(files[i], "r");
-    //     fscanf(stream, "%d ", &procId);
-    //     fclose(stream);
-    //     *ptrs[procId] = files[i];
-    //     ptrs[procId] = ptrs[procId] + 1;
-    // }
-
     for (int i = 0; i < numProcesses; i++) {
         // establish filename <thisPID>.<destinationPID>
         char* thisOut = calloc(1, sizeof(char) * 1024);
@@ -132,9 +132,9 @@ int main(int argc, char* argv[]) {
         free(destination);
     }
 
+    // free allocated memory
     free(ptrs);
     free(filesPerProcess);
-
     for (int i = 0; i < numProcesses; i++) {
         free(sublists[i]);
     }
